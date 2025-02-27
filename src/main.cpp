@@ -3,30 +3,19 @@
 
 #include <ESP32Servo.h>
 #include <PS4Controller.h>
-#include "esp_bt_main.h"
-#include "esp_bt_device.h"
-#include "esp_gap_bt_api.h"
-#include "esp_err.h"
-
 
 unsigned long lastTimeStamp = 0;
-#define EVENTS 0
-#define BUTTONS 0
-#define JOYSTICKS 1
-#define SENSORS 0
-
-
-
 
 // Define motor driver pins
+// left motor (I think)
 const int motor1_in1 = 15;
 const int motor1_in2 = 2;
 
-
+// right motor 
 const int motor2_in1 = 0;
 const int motor2_in2 = 4;
 
-
+// weapon motor 
 const int motor3_in1 = 16;
 const int motor3_in2 = 17;
 
@@ -39,8 +28,6 @@ const int servo2_pin = 11;
 // Create servo objects
 Servo servo1;
 Servo servo2;
-
-
 
 
 void setup() {
