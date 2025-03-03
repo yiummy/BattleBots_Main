@@ -20,7 +20,7 @@ const int motor3_in2 = 17;
 const int motor3_pow = 345; // dummy pin, should be wired to nothing
 
 // Define servo pins
-const int servo1_pin = 10;
+const int servo1_pin = 12;
 const int servo2_pin = 11;
 
 // Create servo objects
@@ -76,8 +76,10 @@ void setup() {
 
   Serial.println("Motor pins initialized");
   Serial.println("Initializing PS4 Controller...");
+  btStop();
+  btStart();
 
-  PS4.begin("84:2F:57:1A:B8:54"); // TODO: change the mac address of the code for new contorller
+  PS4.begin("F4:93:9F:69:C0:3A"); // TODO: change the mac address of the code for new contorller
   Serial.println("PS4 initialization complete");
   Serial.println("Waiting for controller connection...");
 }
