@@ -7,24 +7,29 @@
 // The Pin number corresponds to the GPIO pin 
 // board pinouts correspond to the following: https://randomnerdtutorials.com/esp32-pinout-reference-gpios/ 
 
+// ONLY USE THESE PINS: 
+// good pins: 2 3 4 5 12 13 14 15 16 17 18 19 20 21 22 23 (not 24) 25 26 
+
+
 // left motor (I think)
-const int motor1_in1 = 36;
-const int motor1_in2 = 39;
-const int motor1_pow = 34;
+const int motor1_in1 = 2;
+const int motor1_in2 = 3;
+const int motor1_pow = 4;
 
 // right motor
-const int motor2_in1 = 35;
-const int motor2_in2 = 32;
-const int motor2_pow = 33;
+const int motor2_in1 = 5;
+const int motor2_in2 = 12;
+const int motor2_pow = 13;
 
 // weapon motor
-const int motor3_in1 = 25;
-const int motor3_in2 = 26;
-const int motor3_pow = 27; // dummy pin, should be wired to nothing
+const int motor3_in1 = 14;
+const int motor3_in2 = 15;
+const int motor3_pow = 16; // dummy pin, should be wired to nothing
 
 // Define servo pins
-const int servo1_pin = 14;
-const int servo2_pin = 12;
+// REMEMBER to GROUND THE ESP 
+const int servo1_pin = 25; // LEFT 
+const int servo2_pin = 26; // RIGHT 
 
 // Create servo objects
 Servo servo1;
@@ -44,7 +49,7 @@ bool squareVal;
 bool crossVal;
 unsigned long crossPressTime = 0;
 unsigned long squarePressTime = 0;
-int flipperAngle = 60; // degrees, how high the flipper goes (must be less than 90)
+int flipperAngle = 75; // degrees, how high the flipper goes (must be less than 90)
 
 // motor values to send to drivers
 int LMPow; // Pow is 0-255 for analogwrite duty cycle
@@ -94,6 +99,8 @@ void loop() {
   if (PS4.isConnected()) {
     if (!lastConnectionState) {
       Serial.println("Controller Connected!");
+      safetyEnabled = true; 
+      Serial.println("Safety ENABLED"); 
       lastConnectionState = true;
     }
 
@@ -110,34 +117,52 @@ void loop() {
 
     // digitalWrite(STATUS_LED, HIGH); // option status LED?
 
+    // Safety controls
+    if (PS4.Circle()) {
+      safetyEnabled = !safetyEnabled;
+      if (safetyEnabled != lastSafetyState) {
+        Serial.printf("Safety %s\n", safetyEnabled ? "ENABLED" : "DISABLED");
+        lastSafetyState = safetyEnabled;
+      }
+      if (safetyEnabled) {
+        stopAll();
+        Serial.println("All motors stopped due to safety");
+      }
+      delay(200);
+    } 
+    if (safetyEnabled) {
+      delay(100); 
+      return; 
+    }
+
     // TODO: TEST THE CONTROLLLLS
-    leftY = PS4.RStickY();
-    leftX = PS4.RStickX();
+    leftY = PS4.LStickY();
+    leftX = PS4.LStickX();
     crossVal = PS4.Cross();
     squareVal = PS4.Square();
 
     // toggling flipper and drum on/off
-    if (crossVal & millis() - crossPressTime > 100) {
+    if (crossVal & millis() - crossPressTime > 150) {
       flipperUp = !flipperUp;
       crossPressTime = millis();
     }
-    if (squareVal & millis() - squarePressTime > 100) {
+    if (squareVal & millis() - squarePressTime > 150) {
       drumOn = !drumOn;
       squarePressTime = millis();
     }
 
-    if (abs(leftY) > 10 || abs(leftX) > 10) {
-      Serial.printf("Controls - LY: %d, LX: %d, FlipperUp: ", leftY, leftX, flipperUp);
-    }
+    //if (abs(leftY) > 10 || abs(leftX) > 10) {
+      Serial.printf("Controls - LY: %d, LX: %d, Flipper: %s, Drum: %s \n", leftY, leftX, flipperUp ? "Up" : "Down", drumOn ? "On" : "Off");
+    //}
 
-    if (abs(leftY) < 10 && abs(leftX) < 10) {
+    if (abs(leftY) < 15 && abs(leftX) < 15) {
       // case where stick is 0
       LMPow = 0;
       RMPow = 0;
       RMState = 0;
       LMState = 0;
     }
-    else if (abs(leftY) < 10) {
+    else if (abs(leftY) < 15) {
       // case where stick is horizontal only
       if (leftX > 0) {
         LMState = 1;
@@ -148,7 +173,7 @@ void loop() {
       }
       LMPow = map(abs(leftX), 0, 128, 0, 255);
       RMPow = map(abs(leftX), 0, 128, 0, 255);
-    } else if (abs(leftX) < 10) {
+    } else if (abs(leftX) < 15) {
       // case where stick is vertical only
       if (leftY < 0) {
         LMState = -1;
@@ -187,19 +212,6 @@ void loop() {
       LMPow = int(LMPow * scale);
     }
 
-    // Safety controls
-    if (PS4.Circle()) {
-      safetyEnabled = !safetyEnabled;
-      if (safetyEnabled != lastSafetyState) {
-        Serial.printf("Safety %s\n", safetyEnabled ? "ENABLED" : "DISABLED");
-        lastSafetyState = safetyEnabled;
-      }
-      if (safetyEnabled) {
-        stopAll();
-        Serial.println("All motors stopped due to safety");
-      }
-      delay(200);
-    }
     // write to motors if safe
     if (!safetyEnabled) {
       motorControl(LMState, motor1_in1, motor1_in2, motor1_pow, LMPow);   // left motor
@@ -216,7 +228,7 @@ void loop() {
     stopAll();
   }
 
-  delay(20);
+  delay(40);
 }
 
 void motorControl(int motorState, int pin1, int pin2, int speedpin, int motorSpeed) {
