@@ -3,25 +3,28 @@
 #include <PS4Controller.h>
 
 // Define motor driver pins
+// TODO: edit these pinouts to match the actual board 
+// The Pin number corresponds to the GPIO pin 
+// board pinouts correspond to the following: https://randomnerdtutorials.com/esp32-pinout-reference-gpios/ 
+
 // left motor (I think)
-// TODO: edit these pinouts to match the actual board
-const int motor1_in1 = 15;
-const int motor1_in2 = 2;
-const int motor1_pow = 3;
+const int motor1_in1 = 36;
+const int motor1_in2 = 39;
+const int motor1_pow = 34;
 
 // right motor
-const int motor2_in1 = 0;
-const int motor2_in2 = 4;
-const int motor2_pow = 2874;
+const int motor2_in1 = 35;
+const int motor2_in2 = 32;
+const int motor2_pow = 33;
 
 // weapon motor
-const int motor3_in1 = 16;
-const int motor3_in2 = 17;
-const int motor3_pow = 345; // dummy pin, should be wired to nothing
+const int motor3_in1 = 25;
+const int motor3_in2 = 26;
+const int motor3_pow = 27; // dummy pin, should be wired to nothing
 
 // Define servo pins
-const int servo1_pin = 12;
-const int servo2_pin = 11;
+const int servo1_pin = 14;
+const int servo2_pin = 12;
 
 // Create servo objects
 Servo servo1;
@@ -71,15 +74,17 @@ void setup() {
   servo2.attach(servo2_pin);
 
   Serial.begin(115200);
-  delay(1000);
   Serial.println("\n\nBattleBot PS4 Controller Starting");
 
   Serial.println("Motor pins initialized");
   Serial.println("Initializing PS4 Controller...");
-  btStop();
-  btStart();
 
-  PS4.begin("F4:93:9F:69:C0:3A"); // TODO: change the mac address of the code for new contorller
+  PS4.begin(); // Followed tutorial on https://www.youtube.com/watch?v=dRysvxQfVDw 
+  // In order to connect, upload this code to the ESP32. 
+  // Once upload is finished, press enable (EN) button on the ESP. 
+  // Shortly after (a second or so), press the home button on the controller to turn it on 
+  delay(1000);
+
   Serial.println("PS4 initialization complete");
   Serial.println("Waiting for controller connection...");
 }
