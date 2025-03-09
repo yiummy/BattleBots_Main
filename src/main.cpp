@@ -12,24 +12,26 @@
 
 
 // left motor (I think)
-const int motor1_in1 = 2;
-const int motor1_in2 = 3;
-const int motor1_pow = 4;
+const int motor1_in1 = 18;
+const int motor1_in2 = 19;
+const int motor1_pow = 21;
 
 // right motor
-const int motor2_in1 = 5;
-const int motor2_in2 = 12;
-const int motor2_pow = 13;
+const int motor2_in1 = 15;
+const int motor2_in2 = 4;
+const int motor2_pow = 5;
 
 // weapon motor
-const int motor3_in1 = 14;
-const int motor3_in2 = 15;
-const int motor3_pow = 16; // dummy pin, should be wired to nothing
+const int motor3_in1 = 13;
+const int motor3_in2 = 12;
+const int motor3_pow = 14; // dummy pin, should be wired to nothing
 
 // Define servo pins
 // REMEMBER to GROUND THE ESP 
 const int servo1_pin = 25; // LEFT 
 const int servo2_pin = 26; // RIGHT 
+
+const int LEDPIN = 2; 
 
 // Create servo objects
 Servo servo1;
@@ -67,12 +69,15 @@ void setup() {
   // Initialize motor control pins as outputs
   pinMode(motor1_in1, OUTPUT);
   pinMode(motor1_in2, OUTPUT);
+  pinMode(motor1_pow, OUTPUT); 
 
   pinMode(motor2_in1, OUTPUT);
   pinMode(motor2_in2, OUTPUT);
+  pinMode(motor2_pow, OUTPUT); 
 
   pinMode(motor3_in1, OUTPUT);
   pinMode(motor3_in2, OUTPUT);
+  pinMode(LEDPIN, OUTPUT); 
 
   // Attach servos
   servo1.attach(servo1_pin);
@@ -132,6 +137,7 @@ void loop() {
     } 
     if (safetyEnabled) {
       delay(100); 
+      digitalWrite(LEDPIN, HIGH); 
       return; 
     }
 
@@ -218,6 +224,7 @@ void loop() {
       motorControl(RMState, motor2_in1, motor2_in2, motor2_pow, LMPow);   // right motor
       motorControl(int(drumOn), motor3_in1, motor3_in2, motor3_pow, 255); // drum motor
       flipperWrite(flipperUp);
+      digitalWrite(LEDPIN, LOW); 
     }
   } else {
     if (lastConnectionState) {
